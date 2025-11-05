@@ -9,13 +9,16 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        feature: ["actix", "axum"]
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Run tests
         working-directory: zero2prod
-        run: cargo test
+        run: cargo test --no-default-features --features ${{ matrix.feature }}
 
   fmt:
     name: Rustfmt
@@ -54,4 +57,4 @@ jobs:
       - name: Generate code coverage
         working-directory: zero2prod
         run: |
-          cargo tarpaulin --verbose --workspace
+          cargo tarpaulin --verbose --all-features
