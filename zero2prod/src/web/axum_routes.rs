@@ -1,13 +1,11 @@
 use super::*;
 use axum::{Form, Router, http::StatusCode, routing::get, routing::post};
 
-async fn health_check() -> StatusCode {
-    StatusCode::OK
-}
+mod health_check;
+mod subscriptions;
 
-async fn subscribe(x: Form<SubscriptionRequest>) -> StatusCode {
-    StatusCode::OK
-}
+pub use health_check::*;
+pub use subscriptions::*;
 
 pub fn run(listener: TcpListener) -> io::Result<ServerFuture> {
     listener.set_nonblocking(true)?;

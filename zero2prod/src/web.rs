@@ -9,19 +9,19 @@ struct SubscriptionRequest {
 }
 
 #[cfg(feature = "actix")]
-mod actix_impl;
+mod actix_routes;
 
 #[cfg(feature = "axum")]
-mod axum_impl;
+mod axum_routes;
 
 pub fn run(listener: TcpListener) -> io::Result<ServerFuture> {
     #[cfg(feature = "actix")]
     {
-        actix_impl::run(listener)
+        actix_routes::run(listener)
     }
     #[cfg(feature = "axum")]
     {
-        axum_impl::run(listener)
+        axum_routes::run(listener)
     }
     #[cfg(not(any(feature = "actix", feature = "axum")))]
     {

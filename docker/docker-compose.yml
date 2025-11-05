@@ -1,0 +1,12 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: freak
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: newsletter
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql
+      - ./postgresql.conf:/var/lib/postgresql/data/postresql.conf:ro

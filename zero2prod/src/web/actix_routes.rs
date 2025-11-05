@@ -1,13 +1,11 @@
 use super::*;
 use actix_web::{App, HttpResponse, HttpServer, dev::Server, web};
 
-async fn health_check() -> HttpResponse {
-    HttpResponse::Ok().finish()
-}
+mod health_check;
+mod subscriptions;
 
-async fn subscribe(_form: web::Form<SubscriptionRequest>) -> HttpResponse {
-    HttpResponse::Ok().finish()
-}
+pub use health_check::*;
+pub use subscriptions::*;
 
 pub fn run(listener: TcpListener) -> io::Result<ServerFuture> {
     let server: Server = HttpServer::new(|| {
