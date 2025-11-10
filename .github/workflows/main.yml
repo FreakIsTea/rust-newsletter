@@ -21,6 +21,13 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    environment: "dev" # When using main as prod => ${{ inputs.env != '' && inputs.env || (github.ref_name == 'main' && 'prod' || 'dev') }}
+    env:
+      POSTGRES_USER: ${{vars.POSTGRES_USER}}
+      POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD}}
+      POSTGRES_DB: ${{vars.POSTGRES_DB}}
+      POSTGRES_PORT: ${{vars.POSTGRES_PORT}}
+      DATABASE_URL: "postgres://${{vars.POSTGRES_USER}}:${{secrets.POSTGRES_PASSWORD}}@localhost:${{vars.POSTGRES_PORT}}/${{vars.POSTGRES_DB}}"
     strategy:
       matrix:
         feature: ["actix", "axum"]
@@ -29,15 +36,25 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Spin up Postgres for testing
-        run: docker compose -f ./docker/docker-compose.yml up -d --wait
-      - name: Setup slqx
-        run: cargo install sqlx --version ${{vars.SQLX_VERSION}} --features ${{vars.SQLX_FEATURES}} --no-default-features --locked
+        working-directory: docker
+        run: docker compose up -d --wait
+      - uses: taiki-e/cache-cargo-install-action@v2
+        with:
+          tool: sqlx-cli@${{vars.SQLX_VERSION}}
+          no-default-features: true
+          features: ${{vars.SQLX_FEATURES}}
+      - name: Run sqlx migrations
+        working-directory: zero2prod
+        run: sqlx migrate run
       - name: Run tests
         working-directory: zero2prod
-        run: cargo test --no-default-features --features ${{ matrix.feature }}
+        run: |
+          echo ${{secrets.CONFIGURATION_YAML}} >> configuration.yaml
+          cargo test --no-default-features --features ${{ matrix.feature }}
       - name: Tear down
         if: always()
-        run: docker compose -f ./docker/docker-compose.yml down -v
+        working-directory: docker
+        run: docker compose down -v
 
   fmt:
     name: Rustfmt

@@ -30,7 +30,7 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
     let saved = sqlx::query!("SELECT email, name FROM subscriptions")
         .fetch_one(&mut connection)
         .await
-        .expect("Failed to fecth saved subscription");
+        .expect("Failed to fetch saved subscription");
 
     assert_eq!(StatusCode::OK, response.status());
 }
